@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const JSONStream = require('JSONStream');
+const es = require('event-stream');
+const _ = require('lodash');
+
+var names = [], meta = {};
+
+fs.createReadStream('./data/skimdb.json')
+  .pipe(JSONStream.parse('rows.*'))
+  .pipe(es.mapSync(function (pkg) {
+    names.push(pkg.value.name);
+    process.stdout.write('.');
+    return pkg;
+  }))
+  .on('end', function () {
+    names = _.compact(names);
+    meta = {npmNamesLength: names.length};
+
+    fs.writeFileSync('./build/npm-names.json', JSON.stringify(names, null, 2));
+    fs.writeFileSync('./meta.json', JSON.stringify(meta, null, 2));
+
+    console.log('\nFinished !')
+  })

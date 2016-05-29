@@ -1,0 +1,36 @@
+{
+  "name": "mora-bot",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "download": "curl https://skimdb.npmjs.com/registry/_design/scratch/_view/byField -o data/skimdb.json",
+    "extract": "scripts/extract",
+    "build": "npm run download && npm run extract",
+    "release": "scripts/release",
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/program-bot/mora-bot.git"
+  },
+  "files": [
+    "build/*",
+    "scripts/*",
+    "test/*",
+    "meta.json",
+    "README.md"
+  ],
+  "keywords": [],
+  "author": "Mora",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/program-bot/mora-bot/issues"
+  },
+  "homepage": "https://github.com/program-bot/mora-bot#readme",
+  "devDependencies": {
+    "JSONStream": "^1.1.1",
+    "ava": "^0.15.1",
+    "event-stream": "^3.3.2",
+    "lodash": "^4.13.1"
+  }
+}
