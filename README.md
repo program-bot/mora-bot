@@ -1,6 +1,6 @@
 # mora-bot
 
-[参考文章](http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/)
+[参考文章](http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/) [本地备份](./res/npm-and-github-automation-with-heroku.html)
 
 参考项目：
 

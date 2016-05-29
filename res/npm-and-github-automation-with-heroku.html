@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Zeke Sikelianos, Designer/Developer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="./npm-and-github-automation-with-heroku_files/index.css">
+  <script type="text/javascript" async="" src="./npm-and-github-automation-with-heroku_files/analytics.js"></script><script type="text/javascript" async="" src="./npm-and-github-automation-with-heroku_files/analytics.min.js"></script><script src="./npm-and-github-automation-with-heroku_files/index.js"></script><style type="text/css"></style>
+<link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/7522fd06-33ff-42a3-88a9-d7840a569764"><style type="text/css">.react-spinner{position:relative;width:32px;height:32px;top:50%;left:50%}.react-spinner_bar{-webkit-animation:react-spinner_spin 1.2s linear infinite;animation:react-spinner_spin 1.2s linear infinite;border-radius:5px;background-color:#fff;position:absolute;width:20%;height:7.8%;top:-3.9%;left:-10%}@keyframes react-spinner_spin{0%{opacity:1}to{opacity:.15}}@-webkit-keyframes react-spinner_spin{0%{opacity:1}to{opacity:.15}}</style><link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/19de2268-98d5-4646-bda5-6a4b5286491c"><link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/37e7591f-fa9c-4a25-a879-b7864c29b53f"><link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/85aabde4-d967-4128-8d35-fbf36a21dc99"><link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/0ca90f55-e701-4b68-a559-3dea8ba9d071"><link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/a91835c6-e30a-4a3c-8e40-495d6b97bd7a"><link rel="stylesheet" href="blob:http%3A//zeke.sikelianos.com/0464701b-f8ed-4ce6-b78f-505b0aa737a3"></head>
+
+<body>
+
+    <div class="color-bar">
+        <div style="background:#cb4b21;"></div>
+        <div style="background:#dca76b;"></div>
+        <div style="background:#381a13;"></div>
+        <div style="background:#794835;"></div>
+        <div style="background:#be997e;"></div>
+    </div>
+
+    <div class="breadcrumbs muted">
+      <a href="http://zeke.sikelianos.com/">zeke.sikelianos.com</a>
+    </div>
+
+  <article>
+    <div class="page__content">
+      <header>
+        <h1 class="page__title">The Sweet Sensation of Automation</h1>
+          <h2 class="page__description">A guide to automated npm publishing and GitHub pushing using Heroku</h2>
+          <time class="page__publish-date" title="Sat May 14 2016 17:00:00 GMT-0700 (PDT)" data-date="Sat May 14 2016 17:00:00 GMT-0700 (PDT)" data-format="%B %Y">May 2016</time>
+      </header>
+
+      <!--
+title: The Sweet Sensation of Automation
+description: A guide to automated npm publishing and GitHub pushing using Heroku
+keywords: [npm, github, heroku, shell]
+thumbnail_credit: https://www.flickr.com/photos/32281279@N04/5232348119
+publish_date: 2016-05-15
+-->
+<p>Last year I created a little npm module called
+<a href="http://npm.im/all-the-package-names">all-the-package-names</a>. It's a simple
+array of all the existing package names in the npm
+registry. It can be used to find if a package name is
+<a href="https://www.npmjs.com/package/available">available</a>, or to find all packages
+with names <a href="https://github.com/zeke/all-the-package-names/blob/2c1964f038c70f08b04482eb68ce3387e257844f/example.js#L12">matching a given pattern</a>.</p>
+<p>Here's a one-liner to try it out:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>npm&nbsp;i&nbsp;-g&nbsp;trymodule&nbsp;</span><span class="keyword operator list shell"><span>&amp;&amp;</span></span><span>&nbsp;trymodule&nbsp;all-the-package-names</span></span></div></pre></code></pre>
+<p>This module was easy to create, but it is by nature impossible to keep up to
+date, as hundreds of new packages are added to the npm registry every day.</p>
+<p>I wanted to remove myself from the publishing equation, so I set up a scheduled
+task on Heroku that runs every hour, fetches new names from the registry, commits
+changes to git, and publishes to npm. To enable this, I had to figure out how to
+securely perform all these operations within the confines of a Heroku dyno:</p>
+<ul>
+<li>Clone a repository from GitHub</li>
+<li>Run a build task using npm scripts</li>
+<li>Commit changes to the git repository</li>
+<li>Publish new package versions to npm</li>
+<li>Push changes to GitHub</li>
+<li>Keep credentials safe and outside the codebase</li>
+</ul>
+<p>This post covers the steps required in setting up such an automation scheme.
+It is assumed that you have basic working knowledge of Heroku, npm,
+and GitHub.</p>
+<h2 id="the-heroku-app" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#the-heroku-app">The Heroku App</a></h2>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;create&nbsp;my-npm-bot</span></span></div></pre></code></pre>
+<p>Unlike a typical Heroku app, this app doesn't have a <code>web</code> process. There's
+no web server listening on a port and serving requests. It's just an app on
+a faceless computer in the cloud that will wake up on occasion to do your bidding.</p>
+<h2 id="heroku-buildpacks" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#heroku-buildpacks">Heroku Buildpacks</a></h2>
+<p>Heroku has these awesome <a href="https://devcenter.heroku.com/articles/buildpacks">open source</a>
+things called buildpacks that give you complete control of your app's build process.
+A buildpack
+is a script that is executed on your app's code to prepare it to run on
+the Heroku platform. When you deploy a Node.js app, for example, Heroku's
+<a href="https://github.com/heroku/heroku-buildpack-nodejs">Node buildpack</a> is used
+to download <code>node</code> and <code>npm</code>, run <code>npm install</code>, etc.</p>
+<p>In most cases, Heroku users don't need to know about buildpacks at all. Heroku
+detects the language or framework of your web app and automatically
+chooses the right buildpack for you. But sometimes you need to exercise control
+over the app's build process, and that's when buildpacks come in handy.</p>
+<p>For the purposes of this app, three buildpacks are required:</p>
+<ul>
+<li><strong><a href="https://github.com/zeke/github-buildpack">zeke/github-buildpack</a></strong> sets up
+a <code>.netrc</code> file to store GitHub credentials.</li>
+<li><strong><a href="https://github.com/zeke/npm-buildpack">zeke/npm-buildpack</a></strong> sets up a
+<code>.npmrc</code> file to store npm credentials.</li>
+<li><strong><a href="https://github.com/heroku/heroku-buildpack-nodejs">heroku/nodejs</a></strong> installs
+node and npm, which we'll use in our release script.</li>
+</ul>
+<p>To add these three buildpacks to your app, run the following commands:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;buildpacks:add&nbsp;-i&nbsp;1&nbsp;https://github.com/zeke/github-buildpack</span></span></div><div class="line"><span class="source shell"><span>heroku&nbsp;buildpacks:add&nbsp;-i&nbsp;2&nbsp;https://github.com/zeke/npm-buildpack</span></span></div><div class="line"><span class="source shell"><span>heroku&nbsp;buildpacks:add&nbsp;-i&nbsp;3&nbsp;heroku/nodejs</span></span></div></pre></code></pre>
+<p>The <code>i</code> stands for <code>index</code>, allowing you to specify the order in which the
+buildpacks are executed. In many cases this order is important, but for our
+purposes the order probably doesn't matter, as none of these buildpacks are
+relying on functionality or build artifacts from another.</p>
+<h2 id="github-authentication" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#github-authentication">GitHub Authentication</a></h2>
+<p>GitHub provides a <a href="https://github.com/settings/tokens/new">simple web interface</a>
+for creating auth tokens.
+<a href="https://github.com/settings/tokens/new">Create a token</a> with <code>repo</code> access,
+then add it to your Heroku app's config:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;config:</span><span class="support function builtin shell"><span>set</span></span><span>&nbsp;GITHUB_AUTH_TOKEN=YOUR_TOKEN</span></span></div></pre></code></pre>
+<p>The next time you push your app to Heroku, the <a href="https://github.com/zeke/github-buildpack">GitHub buildpack</a>
+you just added will
+detect the presence of <code>GITHUB_AUTH_TOKEN</code> in your app's environment, and use
+it to create a <code>.netrc</code> file.</p>
+<h2 id="the-netrc-file" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#the-netrc-file">The .netrc File</a></h2>
+<p><code>~/.netrc</code> is a plaintext file used to store credentials for accessing
+remote machines. It's an <a href="https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html">old school unix thing</a>,
+so it's widely supported by tools like <code>curl</code>, <code>git</code>, and the <a href="https://devcenter.heroku.com/articles/heroku-command#logging-in">heroku toolbelt</a>,</p>
+<p>Here's what an entry for GitHub looks like:</p>
+<pre><code><pre class="editor editor-colors"><div class="line"><span class="text plain null-grammar"><span>machine&nbsp;github.com&nbsp;login&nbsp;YOUR_TOKEN&nbsp;password&nbsp;x-oauth-basic</span></span></div></pre></code></pre>
+<p>If you pass the <code>--netrc</code> flag to <code>curl</code> (or <code>-n</code> for short), it will automatically read credentials
+from your <code>~/.netrc</code> file, allowing you to easily make authenticated requests:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>curl&nbsp;-n&nbsp;https://api.heroku.com/apps</span></span></div><div class="line"><span class="source shell"><span>curl&nbsp;-n&nbsp;https://api.github.com/users/zeke/repos</span></span></div></pre></code></pre>
+<p>Now that the GitHub credentials are securely stored, <code>git</code> commands like
+<code>git push</code> will be automatically authenticated.</p>
+<h2 id="npm-authentication" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#npm-authentication">npm Authentication</a></h2>
+<p>npm doesn't have a fancy web interface for creating tokens, nor does it support
+the <code>.netrc</code> format. It is possible, however, to find your personal token by
+looking in the <code>.npmrc</code> file in your home directory.</p>
+<p>Here's a one-liner for reading that token:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>cat&nbsp;</span><span class="keyword operator tilde shell"><span>~</span></span><span>/.npmrc&nbsp;</span><span class="keyword operator pipe shell"><span>|</span></span><span>&nbsp;head&nbsp;-1&nbsp;</span><span class="keyword operator pipe shell"><span>|</span></span><span>&nbsp;sed&nbsp;</span><span class="string quoted single shell"><span class="punctuation definition string begin shell"><span>'</span></span><span>s/.*=//g</span><span class="punctuation definition string end shell"><span>'</span></span></span></span></div></pre></code></pre>
+<p>Add the token to your Heroku app's config:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;config:</span><span class="support function builtin shell"><span>set</span></span><span>&nbsp;NPM_AUTH_TOKEN=YOUR_TOKEN</span></span></div></pre></code></pre>
+<p>Like the GitHub buildpack, the <a href="https://github.com/zeke/npm-buildpack">npm buildpack</a>
+will detect the <code>NPM_AUTH_TOKEN</code> environment variable and use it to write a
+<code>.npmrc</code> file into the app directory. Any <code>npm</code> commands that require authentication
+(like <code>publish</code> and <code>whoami</code>) will now be authenticated automatically when they
+are run within the app directory.</p>
+<h2 id="testing-in-a-remote-bash-shell" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#testing-in-a-remote-bash-shell">Testing in a Remote Bash Shell</a></h2>
+<p>To figure out if everything's working, deploy your app:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>git&nbsp;commit&nbsp;--allow-empty&nbsp;</span><span class="string quoted double shell"><span class="punctuation definition string begin shell"><span>"</span></span><span>testing&nbsp;npm&nbsp;and&nbsp;github&nbsp;auth</span><span class="punctuation definition string end shell"><span>"</span></span></span></span></div><div class="line"><span class="source shell"><span>git&nbsp;push&nbsp;heroku&nbsp;master</span></span></div></pre></code></pre>
+<p>Then open up a remote bash shell containing your app's code and environment:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;run&nbsp;bash</span></span></div><div class="line"><span class="source shell"><span>cat&nbsp;.npmrc</span></span></div><div class="line"><span class="source shell"><span>cat&nbsp;.netrc</span></span></div></pre></code></pre>
+<p>If everything is configured properly, you'll see your credentials in the
+<code>.netrc</code> and <code>.npmrc</code> files, and you should be able to run authenticated
+commands like <code>npm whoami</code> and <code>git push</code>.</p>
+<p>Tip: If you try to <code>git push</code> your app to Heroku and get an "Everything up to date"
+message from git, it's because nothing in your source code has changed. To
+force-push the repo to Heroku, create an empty commit:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>git&nbsp;commit&nbsp;--allow-empty&nbsp;-m&nbsp;</span><span class="string quoted double shell"><span class="punctuation definition string begin shell"><span>"</span></span><span>empty&nbsp;commit</span><span class="punctuation definition string end shell"><span>"</span></span></span></span></div><div class="line"><span class="source shell"><span>git&nbsp;push&nbsp;heroku&nbsp;master</span></span></div></pre></code></pre>
+<h2 id="the-release-script" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#the-release-script">The Release Script</a></h2>
+<p>Once the authentication is set up, the next step is to write a release
+script to be executed periodically on Heroku.</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>mkdir&nbsp;-p&nbsp;scripts</span></span></div><div class="line"><span class="source shell"><span>touch&nbsp;scripts/release</span></span></div><div class="line"><span class="source shell"><span>chmod&nbsp;+x&nbsp;scripts/release</span></span></div></pre></code></pre>
+<p>Next, add the release script to <code>package.json</code>, so it can be executed as an
+npm script:</p>
+<pre><code class="highlight json"><pre class="editor editor-colors"><div class="line"><span class="source json"><span class="meta structure dictionary json"><span class="punctuation definition dictionary begin json"><span>{</span></span></span></span></div><div class="line"><span class="source json"><span class="meta structure dictionary json"><span>&nbsp;&nbsp;</span><span class="string quoted double json"><span class="punctuation definition string begin json"><span>"</span></span><span>name</span><span class="punctuation definition string end json"><span>"</span></span></span><span class="meta structure dictionary value json"><span class="punctuation separator dictionary key-value json"><span>:</span></span><span>&nbsp;</span><span class="string quoted double json"><span class="punctuation definition string begin json"><span>"</span></span><span>all-the-package-names</span><span class="punctuation definition string end json"><span>"</span></span></span><span class="punctuation separator dictionary pair json"><span>,</span></span></span></span></span></div><div class="line"><span class="source json"><span class="meta structure dictionary json"><span>&nbsp;&nbsp;</span><span class="string quoted double json"><span class="punctuation definition string begin json"><span>"</span></span><span>scripts</span><span class="punctuation definition string end json"><span>"</span></span></span><span class="meta structure dictionary value json"><span class="punctuation separator dictionary key-value json"><span>:</span></span><span>&nbsp;</span><span class="meta structure dictionary json"><span class="punctuation definition dictionary begin json"><span>{</span></span></span></span></span></span></div><div class="line"><span class="source json"><span class="meta structure dictionary json"><span class="meta structure dictionary value json"><span class="meta structure dictionary json"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="string quoted double json"><span class="punctuation definition string begin json"><span>"</span></span><span>release</span><span class="punctuation definition string end json"><span>"</span></span></span><span class="meta structure dictionary value json"><span class="punctuation separator dictionary key-value json"><span>:</span></span><span>&nbsp;</span><span class="string quoted double json"><span class="punctuation definition string begin json"><span>"</span></span><span>scripts/release</span><span class="punctuation definition string end json"><span>"</span></span></span></span></span></span></span></span></div><div class="line"><span class="source json"><span class="meta structure dictionary json"><span class="meta structure dictionary value json"><span class="meta structure dictionary json"><span class="meta structure dictionary value json"><span>&nbsp;&nbsp;</span></span><span class="punctuation definition dictionary end json"><span>}</span></span></span></span></span></span></div><div class="line"><span class="source json"><span class="meta structure dictionary json"><span class="punctuation definition dictionary end json"><span>}</span></span></span></span></div></pre></code></pre>
+<p>Here's a simplified version of the release script used by
+<code>all-the-package-names</code>. For the full script, check out <a href="https://github.com/zeke/all-the-package-names/blob/master/scripts/release">scripts/release on the GitHub repo</a>.</p>
+<pre><code><pre class="editor editor-colors"><div class="line"><span class="source shell"><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>!/usr/bin/env&nbsp;bash</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span>&nbsp;</span></span></div><div class="line"><span class="source shell"><span class="support function builtin shell"><span>set</span></span><span>&nbsp;-x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;print&nbsp;each&nbsp;command&nbsp;before&nbsp;execution</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span class="support function builtin shell"><span>set</span></span><span>&nbsp;-o&nbsp;errexit&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;always&nbsp;exit&nbsp;on&nbsp;error</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span class="support function builtin shell"><span>set</span></span><span>&nbsp;-o&nbsp;pipefail&nbsp;&nbsp;&nbsp;</span><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;don't&nbsp;ignore&nbsp;exit&nbsp;codes&nbsp;when&nbsp;piping&nbsp;output</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span class="support function builtin shell"><span>set</span></span><span>&nbsp;-o&nbsp;nounset&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;fail&nbsp;on&nbsp;unset&nbsp;variables</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span>&nbsp;</span></span></div><div class="line"><span class="source shell"><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;set&nbsp;up&nbsp;the&nbsp;repo</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span>git&nbsp;clone&nbsp;https://github.com/zeke/all-the-package-names</span></span></div><div class="line"><span class="source shell"><span class="support function builtin shell"><span>cd</span></span><span>&nbsp;all-the-package-names</span></span></div><div class="line"><span class="source shell"><span>npm&nbsp;run&nbsp;build</span></span></div><div class="line"><span class="source shell"><span>npm&nbsp;</span><span class="support function builtin shell"><span>test</span></span></span></div><div class="line"><span class="source shell"><span>&nbsp;</span></span></div><div class="line"><span class="source shell"><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;bail&nbsp;if&nbsp;no&nbsp;changes&nbsp;are&nbsp;present</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span class="meta scope logical-expression shell"><span class="punctuation definition logical-expression shell"><span>[[</span></span><span>&nbsp;</span><span class="string interpolated backtick shell"><span class="punctuation definition string begin shell"><span>`</span></span><span>git&nbsp;status&nbsp;--porcelain</span><span class="punctuation definition string end shell"><span>`</span></span></span><span>&nbsp;</span><span class="punctuation definition logical-expression shell"><span>]]</span></span></span><span>&nbsp;</span><span class="keyword operator pipe shell"><span>|</span><span>|</span></span><span>&nbsp;</span><span class="support function builtin shell"><span>exit</span></span></span></div><div class="line"><span class="source shell"><span>&nbsp;</span></span></div><div class="line"><span class="source shell"><span>count=</span><span class="string interpolated dollar shell"><span class="punctuation definition string begin shell"><span>$(</span></span><span>cat&nbsp;names.json&nbsp;</span><span class="keyword operator pipe shell"><span>|</span></span><span>&nbsp;wc&nbsp;-l</span><span class="punctuation definition string end shell"><span>)</span></span></span></span></div><div class="line"><span class="source shell"><span>git&nbsp;add&nbsp;names.json</span></span></div><div class="line"><span class="source shell"><span>git&nbsp;config&nbsp;user.email&nbsp;</span><span class="string quoted double shell"><span class="punctuation definition string begin shell"><span>"</span></span><span>zeke@sikelianos.com</span><span class="punctuation definition string end shell"><span>"</span></span></span></span></div><div class="line"><span class="source shell"><span>git&nbsp;config&nbsp;user.name&nbsp;</span><span class="string quoted double shell"><span class="punctuation definition string begin shell"><span>"</span></span><span>Zeke&nbsp;Sikelianos</span><span class="punctuation definition string end shell"><span>"</span></span></span></span></div><div class="line"><span class="source shell"><span>git&nbsp;commit&nbsp;-m&nbsp;</span><span class="string quoted double shell"><span class="punctuation definition string begin shell"><span>"</span></span><span class="variable other normal shell"><span class="punctuation definition variable shell"><span>$</span></span><span>count</span></span><span>&nbsp;package&nbsp;names</span><span class="punctuation definition string end shell"><span>"</span></span></span></span></div><div class="line"><span class="source shell"><span>npm&nbsp;version&nbsp;minor&nbsp;-m&nbsp;</span><span class="string quoted double shell"><span class="punctuation definition string begin shell"><span>"</span></span><span>bump&nbsp;minor&nbsp;to&nbsp;%s</span><span class="punctuation definition string end shell"><span>"</span></span></span></span></div><div class="line"><span class="source shell"><span>npm&nbsp;publish</span></span></div><div class="line"><span class="source shell"><span>git&nbsp;push&nbsp;origin&nbsp;master&nbsp;--follow-tags</span></span></div><div class="line"><span class="source shell"><span>&nbsp;</span></span></div><div class="line"><span class="source shell"><span class="comment line number-sign shell"><span class="punctuation definition comment shell"><span>#</span></span><span>&nbsp;clean&nbsp;up</span><span>&nbsp;</span></span></span></div><div class="line"><span class="source shell"><span class="support function builtin shell"><span>cd</span></span><span>&nbsp;..</span></span></div><div class="line"><span class="source shell"><span>rm&nbsp;-rf&nbsp;all-the-package-names</span></span></div></pre></code></pre>
+<p>Tip: Heroku's node buildpack will install <code>dependencies</code> from package.json
+by default. If your build script requires <code>devDependencies</code> to be installed too,
+set the following in your app environment:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;config:</span><span class="support function builtin shell"><span>set</span></span><span>&nbsp;NPM_CONFIG_PRODUCTION=</span><span class="support function builtin shell"><span>false</span></span></span></div></pre></code></pre>
+<p>There are a few ways to manually test a script on Heroku.
+You can run it remotely:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;run&nbsp;npm&nbsp;run&nbsp;release</span></span></div></pre></code></pre>
+<p>or you can shell into your app and run one-off commands inside the shell:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;run&nbsp;bash</span></span></div><div class="line"><span class="source shell"><span>npm&nbsp;run&nbsp;release</span></span></div></pre></code></pre>
+<h2 id="scheduling-automatic-releases" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#scheduling-automatic-releases">Scheduling Automatic Releases</a></h2>
+<p>Once you've got a working release script, it's time to automate!</p>
+<p>Heroku has a very useful (and free) add-on called <a href="https://scheduler.heroku.com/">Scheduler</a>
+that allows you to configure one-off tasks to run against your app. There's a
+web-based GUI for scheduling tasks, and they can be run every ten minutes, every
+hour, or once a day. It's like <a href="https://en.wikipedia.org/wiki/Cron">cron</a>, but
+much easier to use.</p>
+<p>To install and open Scheduler:</p>
+<pre><code class="highlight sh"><pre class="editor editor-colors"><div class="line"><span class="source shell"><span>heroku&nbsp;addons:create&nbsp;scheduler</span></span></div><div class="line"><span class="source shell"><span>heroku&nbsp;addons:open&nbsp;scheduler</span></span></div></pre></code></pre>
+<p>The scheduler interface is pretty simple. You specify a command to run
+and the frequency at which to run it.</p>
+<figure>
+  <a href="https://devcenter.heroku.com/articles/scheduler">
+    <img src="./npm-and-github-automation-with-heroku_files/scheduler.png" alt="Heroku Scheduler UI">
+  </a>
+</figure>
+<h2 id="its-free" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#its-free">It's Free!</a></h2>
+<p>From the Heroku docs on <a href="https://devcenter.heroku.com/articles/dyno-sleeping">Dyno Sleeping</a>:</p>
+<blockquote>
+<p>Free dynos will sleep when a web dyno receives no web traffic for a period of time. In addition, if a free dyno exceeds a quota of 18 hours of activity during a 24 hour window, it will be forced to recharge.</p>
+</blockquote>
+<p>This means you get 18 hours of compute time per day <strong>for free</strong>! And because
+this app doesn't have a <code>web</code> process, it only needs to be "awake" for a few
+minutes a day for the short amount of time required to run the release task
+every hour.</p>
+<p>Even for apps with long-running tasks at shorter intervals,
+the free dyno would still probably be adequate. A task that runs every 10 minutes
+and takes 5 minutes to complete only amounts to 12 hours of compute time per day,
+which is still under the 18 hour limit.</p>
+<p>If your build process takes a long time or needs to run more frequently,
+a <a href="https://www.heroku.com/pricing">hobby dyno</a> is adequate for most tasks
+and will only set you back $7 a month.</p>
+<h2 id="sit-back-and-watch" class="deep-link"><a href="http://zeke.sikelianos.com/npm-and-github-automation-with-heroku/#sit-back-and-watch">Sit Back and Watch</a></h2>
+<p>Once your automated publishing workflow is finished, you can kick back and let
+the machines do the work, then watch your contribution graph turn a very dark
+shade of green...</p>
+<figure>
+  <a href="https://github.com/search?utf8=%E2%9C%93&amp;q=%40zeke">
+    <img src="./npm-and-github-automation-with-heroku_files/contributions.png" alt="GitHub Contributions">
+  </a>
+</figure>
+
+    </div>
+  </article>
+
+  <footer>
+
+    <div id="footer-site-nav">
+      <a href="http://zeke.sikelianos.com/">Home</a>
+      <a href="http://zeke.sikelianos.com/bio">Bio</a>
+      <a href="http://zeke.sikelianos.com/portfolio">Portfolio</a>
+      <a href="http://zeke.sikelianos.com/contact">Contact Me</a>
+    </div>
+
+    <p class="text-small text-center faint">
+      Built with
+      <a href="http://jus.js.org/">jus</a>,
+      developed on
+      <a href="https://github.com/zeke/zeke.sikelianos.com">GitHub</a>,
+      and deployed on
+      <a href="https://surge.sh/">Surge</a>.
+    </p>
+
+  </footer>
+
+
+</body><div></div></html>
