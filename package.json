@@ -29,7 +29,7 @@
   "homepage": "https://github.com/program-bot/mora-bot#readme",
   "devDependencies": {
     "JSONStream": "^1.1.1",
-    "ava": "^0.15.1",
+    "ava": "^0.15.2",
     "event-stream": "^3.3.2",
     "lodash": "^4.13.1"
   }
