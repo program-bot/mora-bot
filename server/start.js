@@ -3,12 +3,14 @@ const env = process.env;
 
 const express = require('express');
 const wechat = require('wechat');
-const wechatConfig = {
+
+// https://mora-bot.herokuapp.com/wechat
+// test account: http://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index
+let wechatConfig = {
   token: env.WECHAT_TOKEN,
   appid: env.WECHAT_APP_ID,
   encodingAESKey: env.WECHAT_ENCODING_AES_KEY
 };
-
 
 let app = express();
 app.use(express.query());

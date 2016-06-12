@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const notify = require('../libs/notify-api');
+const message = process.argv.slice(2).join(' ');
+
+if (!message) notify.sendError('没有指定消息体');
+else notify.send(message, true);
+

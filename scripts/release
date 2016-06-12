@@ -8,6 +8,7 @@ set -o nounset    # fail on unset variables
 # set up the repo
 git clone https://github.com/program-bot/mora-bot.git
 cd mora-bot
+npm run notify "mora-bot: 开始编译"
 npm run build
 npm test
 
@@ -21,6 +22,7 @@ git commit -m "mora-bot auto commit"
 npm version minor -m "bump minor to %s"
 npm publish
 git push origin master --follow-tags
+npm run notify "mora-bot: 完成发布"
 
 # clean up
 cd ..
