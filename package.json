@@ -2,6 +2,7 @@
   "name": "mora-bot",
   "version": "0.23.0",
   "description": "",
+  "main": "meta.json",
   "scripts": {
     "download-size": "curl \"https://skimdb.npmjs.com/registry/_design/scratch/_view/byField?limit=0&skip=0\" -o data/skimdb-size.json",
     "download": "curl \"https://skimdb.npmjs.com/registry/_design/scratch/_view/byField\" -o data/skimdb.json",
@@ -17,7 +18,7 @@
     "url": "git+https://github.com/program-bot/mora-bot.git"
   },
   "files": [
-    "build/*",
+    "build/npm-names.json",
     "libs/*",
     "scripts/*",
     "test/*",
