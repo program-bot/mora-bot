@@ -1,25 +1,44 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const JSONStream = require('JSONStream');
-const es = require('event-stream');
-const _ = require('lodash');
+const jq = require('jq-stream');
+const Progress = require('progress');
 
-var names = [], meta = {};
+let names = [],
+  meta = {},
+  total = require('../data/skimdb-size.json').total_rows,
+  progress = new Progress('  Parsing [:bar] :percent :etas', {
+    total: total,
+    complete: '=',
+    incomplete: ' ',
+    width: 50
+  });
 
-fs.createReadStream('./data/skimdb.json')
-  .pipe(JSONStream.parse('rows.*'))
-  .pipe(es.mapSync(function (pkg) {
-    names.push(pkg.value.name);
-    process.stdout.write('.');
-    return pkg;
-  }))
-  .on('end', function () {
-    names = _.compact(names);
-    meta = {npmNamesLength: names.length};
+jq('./data/skimdb.json', 'rows.*.value', each, end);
 
-    fs.writeFileSync('./build/npm-names.json', JSON.stringify(names, null, 2));
-    fs.writeFileSync('./meta.json', JSON.stringify(meta, null, 2));
+function each(pkg) {
+  let pkgName = pkg.name; // 注意：有些 package 此字段不存在
+  progress.tick({pkgName: truncate(pkgName, 30)});
+  if (pkgName) {
+    names.push(pkgName);
+  }
+}
 
-    console.log('\nFinished !')
-  })
+function end() {
+  // 记录真实的数组的长度（不要使用 total)
+  meta = {npmNamesLength: names.length};
+
+  fs.writeFileSync('./build/npm-names.json', JSON.stringify(names));
+  fs.writeFileSync('./meta.json', JSON.stringify(meta, null, 2));
+
+  console.log('\n\n  Finished !')
+}
+
+function truncate(str, size, suffix) {
+  str = typeof str === 'string' ? str : '';
+  suffix = suffix || '...';
+
+  size -= suffix.length;
+  return str.length > size ? str.substr(0, size) + suffix : str;
+}
+
