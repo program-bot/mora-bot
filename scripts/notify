@@ -1,8 +1,19 @@
 #!/usr/bin/env node
 
 const notify = require('../libs/notify-api');
-const message = process.argv.slice(2).join(' ');
 
-if (!message) notify.sendError('没有指定消息体');
-else notify.send(message, true);
+
+let args = [];
+let opts = {};
+
+let i, arg, _args = process.argv.slice(2), len = _args.length;
+for (i = 0; i < len; i++) {
+  let arg = _args[i];
+  if (arg.startsWith('--')) opts[arg.substr(2)] = _args[++i];
+  else args.push(arg)
+}
+
+
+if (!args.length) notify.sendError('没有指定消息体');
+else notify.send(args.join(' '), opts.level || 'INFO', true);
 

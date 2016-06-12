@@ -22,7 +22,7 @@ git commit -m "mora-bot auto commit"
 npm version minor -m "bump minor to %s"
 npm publish
 git push origin master --follow-tags
-npm run notify "mora-bot: 完成发布"
+npm run notify "mora-bot: 完成发布" -- --level SUCCESS
 
 # clean up
 cd ..

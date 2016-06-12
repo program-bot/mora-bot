@@ -33,7 +33,7 @@ function end() {
   fs.writeFileSync('./meta.json', JSON.stringify(meta, null, 2));
 
   console.log('\n\n  Finished !');
-  notify.send(meta);
+  notify.sendSuccess(meta);
 }
 
 function truncate(str, size, suffix) {
