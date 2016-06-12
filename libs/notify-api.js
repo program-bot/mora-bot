@@ -79,11 +79,11 @@ const ERROR_PREFIX = `
 
  Error: `;
 function sendError(any) {
-  send(ERROR_PREFIX + JSON.stringify(any), false, 'ERROR');
+  send(ERROR_PREFIX + JSON.stringify(any), 'ERROR', false);
 }
 
 function sendSuccess(any) {
-  send(JSON.stringify(any), false, 'SUCCESS');
+  send(JSON.stringify(any), 'SUCCESS', false);
 }
 
 module.exports = {
