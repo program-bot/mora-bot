@@ -30,7 +30,7 @@ app.use('/wechat', wechat(wechatConfig, (req, res, next) => {
 app.use('/wechat-test', wechat(wechatTestConfig, (req, res, next) => {
 
   let message = req.weixin;
-  console.log('/wechat-test', message);
+  console.log('/wechat-test:', message);
   res.reply('Test Success!');
 
 }));

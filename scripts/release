@@ -13,7 +13,7 @@ npm run build
 npm test
 
 # bail if no changes are present
-[[ `git status --porcelain` ]] || exit
+[[ `git status --porcelain` ]] || npm run notify "mora-bot: 文件没有变化，取消发布" && exit
 
 git add meta.json
 git config user.email "qiuzhongleiabc@126.com"

@@ -31,9 +31,9 @@ heroku run "npm run release"
 
 ## 目录说明
 
-build:    存放生成的文件
-data:     存放网上下载的一些数据
-libs:     一些脚本依赖的库
-res:      其它资源
-scripts:  对应 npm 的 package.json 文件中的 scripts
+* build:    存放生成的文件
+* data:     存放网上下载的一些数据
+* libs:     一些脚本依赖的库
+* res:      其它资源
+* scripts:  对应 npm 的 package.json 文件中的 scripts
 
