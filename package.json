@@ -1,6 +1,6 @@
 {
   "name": "mora-bot",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "",
   "scripts": {
     "download-size": "curl \"https://skimdb.npmjs.com/registry/_design/scratch/_view/byField?limit=0&skip=0\" -o data/skimdb-size.json",
