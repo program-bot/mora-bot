@@ -8,6 +8,8 @@ const WechatAPI = require('wechat-api');
 const api = new WechatAPI(env.TEST_WECHAT_APP_ID, env.TEST_WECHAT_APP_SECRET);
 
 function send(message, shouldReportError = false) {
+  if (typeof message !== 'string') message = JSON.stringify(message);
+
   api.sendText(me, message, (err, body, xhr) => {
     if (err && shouldReportError) sendError({err, body});
   });

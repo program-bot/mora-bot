@@ -3,6 +3,7 @@
 const fs = require('fs');
 const jq = require('jq-stream');
 const Progress = require('progress');
+const notify = require('../libs/notify-api');
 
 let names = [],
   meta = {},
@@ -31,7 +32,8 @@ function end() {
   fs.writeFileSync('./build/npm-names.json', JSON.stringify(names));
   fs.writeFileSync('./meta.json', JSON.stringify(meta, null, 2));
 
-  console.log('\n\n  Finished !')
+  console.log('\n\n  Finished !');
+  notify.send(meta);
 }
 
 function truncate(str, size, suffix) {
