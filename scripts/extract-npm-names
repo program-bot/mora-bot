@@ -32,7 +32,7 @@ function end() {
   fs.writeFileSync('./build/npm-names.json', JSON.stringify(names));
 
   console.log('\n\n  Finished !');
-  notify.sendSuccess(meta.store);
+  notify.sendSuccess(meta.data);
 }
 
 function truncate(str, size, suffix) {

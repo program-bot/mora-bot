@@ -6,6 +6,7 @@ meta.initSync();
 
 
 module.exports = {
+  data: meta.data,
   set: meta.setSync.bind(meta),
   get: meta.getSync.bind(meta)
 };
