@@ -8,6 +8,7 @@
 
 参考项目：
 
+* https://npms.io/ 非常值得研究下
 * https://github.com/zeke/all-the-package-names
 * https://github.com/solids/npmsearch
 * https://github.com/anvaka/npmrank
@@ -27,6 +28,8 @@ https://skimdb.npmjs.com/registry/_design/scratch/_view/byField?limit=5&skip=100
 
 ```
 heroku run "npm run release"
+
+heroku logs --tail
 ```
 
 ## 目录说明

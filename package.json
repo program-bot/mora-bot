@@ -4,8 +4,8 @@
   "description": "",
   "main": "meta.json",
   "scripts": {
-    "download-size": "curl \"https://skimdb.npmjs.com/registry/_design/scratch/_view/byField?limit=0&skip=0\" -o data/skimdb-size.json",
-    "download": "curl \"https://skimdb.npmjs.com/registry/_design/scratch/_view/byField\" -o data/skimdb.json",
+    "download-size": "curl 'https://skimdb.npmjs.com/registry/_design/scratch/_view/byField?limit=0&skip=0' -o data/skimdb-size.json",
+    "download": "curl 'https://skimdb.npmjs.com/registry/_design/scratch/_view/byField' -o data/skimdb.json",
     "extract": "scripts/extract",
     "notify": "scripts/notify",
     "build": "npm run download-size && npm run download && npm run extract",
