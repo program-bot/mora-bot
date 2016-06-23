@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+const meta = require('../libs/meta');
+
+console.log(meta.get('npmNamesLength'));

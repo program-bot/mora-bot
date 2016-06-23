@@ -4,9 +4,9 @@ const fs = require('fs');
 const jq = require('jq-stream');
 const Progress = require('progress');
 const notify = require('../libs/notify-api');
+const meta = require('../libs/meta');
 
 let names = [],
-  meta = {},
   total = require('../data/skimdb-size.json').total_rows,
   progress = new Progress('  Parsing [:bar] :percent :etas', {
     total: total,
@@ -27,13 +27,12 @@ function each(pkg) {
 
 function end() {
   // 记录真实的数组的长度（不要使用 total)
-  meta = {npmNamesLength: names.length};
+  meta.set('totalNpmPackages', names.length);
 
   fs.writeFileSync('./build/npm-names.json', JSON.stringify(names));
-  fs.writeFileSync('./meta.json', JSON.stringify(meta, null, 2));
 
   console.log('\n\n  Finished !');
-  notify.sendSuccess(meta);
+  notify.sendSuccess(meta.store);
 }
 
 function truncate(str, size, suffix) {
