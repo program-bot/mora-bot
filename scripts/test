@@ -2,4 +2,4 @@
 
 let meta = require('../libs/meta');
 
-meta.delete('npmNamesLength')
+console.log(meta.get('totalNpmPackages'))

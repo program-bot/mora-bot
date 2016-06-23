@@ -1,7 +1,11 @@
-const Conf = require('conf');
+const path = require('path');
 
-module.exports = new Conf({
-  configName: 'meta',
-  cwd: require('path').join(__dirname, '..')
-})
+const meta = require('file-setting')(path.join(__dirname, '..', 'meta.json'));
 
+meta.initSync();
+
+
+module.exports = {
+  set: meta.setSync.bind(meta),
+  get: meta.getSync.bind(meta)
+};
