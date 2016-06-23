@@ -34,7 +34,7 @@ cp meta.json ../mora-bot-data/
 
 
 # mora-bot-data 打 tag 并提交到 npm 上
-cd mora-bot-data
+cd ../mora-bot-data
 git add . -A
 
 git commit -m "mora-bot auto commit"
