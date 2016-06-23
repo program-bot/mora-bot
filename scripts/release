@@ -3,7 +3,7 @@
 set -x            # print each command before execution
 set -o errexit    # always exit on error
 set -o pipefail   # don't ignore exit codes when piping output
-set -o nounset    # fail on unset variables
+# set -o nounset    # fail on unset variables
 
 git config --global user.email "qiuzhongleiabc@126.com"
 git config --global user.name "Mora"

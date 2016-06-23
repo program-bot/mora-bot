@@ -1,9 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env node
 
-if [[ "cache" == "$1" && -f "data/skimdb.json" ]]; then
-  cache=true
-fi
+let meta = require('../libs/meta');
 
-if [[ ! $cache ]]; then
-  echo no cache
-fi
+meta.delete('npmNamesLength')
