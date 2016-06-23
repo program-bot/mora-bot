@@ -22,7 +22,12 @@ else
 fi
 
 npm run notify "mora-bot: 开始编译"
+# 获取上一次 build 的结果
+mkdir build/last
+mv ../mora-bot-data/* build/last/
 npm run build
+rm -rf build/last
+
 npm test
 
 # bail if no changes are present
@@ -45,7 +50,9 @@ git push origin master --follow-tags
 
 # mora-bot 只更新 meta.json 文件
 cd ../mora-bot
-git push origin master
+git add meta.json
+git commit -m "mora-bot auto commit"
+git push origin master --follow-tags
 
 npm run notify "mora-bot: 完成发布" -- --level SUCCESS
 
