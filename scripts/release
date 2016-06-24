@@ -14,14 +14,8 @@ git clone https://github.com/program-bot/mora-bot-data.git
 
 # build
 cd mora-bot
-
-if [[ "cache" == "$1" && -f "cache-data/skimdb.json" ]]; then
-  mv ../cache-data/* data/
-else
-  npm run data
-fi
-
 npm run notify "mora-bot: 开始编译"
+npm run data
 # 获取上一次 build 的结果
 mkdir build/last
 mv ../mora-bot-data/data/* build/last/
@@ -56,10 +50,6 @@ git push origin master --follow-tags
 
 npm run notify "mora-bot: 完成发布" -- --level SUCCESS
 
-
 # clean up
 cd ..
-rm -rf cache-data
-mkdir cache-data
-mv mora-bot/data/* cache-data/
 rm -rf mora-bot mora-bot-data
