@@ -9,6 +9,7 @@
 参考项目：
 
 * https://npms.io/ 非常值得研究下
+* http://node-modules.com/
 * https://github.com/zeke/all-the-package-names
 * https://github.com/solids/npmsearch
 * https://github.com/anvaka/npmrank
