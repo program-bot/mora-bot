@@ -15,6 +15,7 @@ let names = [],
     width: 50
   });
 
+meta.set('totalOfficalNpmPackages', total);
 jq('./data/skimdb.json', 'rows.*.value', each, end);
 
 function each(pkg) {
