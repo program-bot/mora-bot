@@ -41,7 +41,7 @@
     "file-setting": "0.0.3",
     "jq-stream": "0.0.1",
     "mocha": "^3.0.2",
-    "progress": "^1.1.8",
+    "progress": "^2.0.0",
     "wechat": "2.0.3",
     "wechat-api": "1.28.0"
   },
