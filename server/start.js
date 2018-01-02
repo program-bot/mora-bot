@@ -17,6 +17,7 @@ const wechatTestConfig = Object.assign({}, wechatConfig, {
 });
 
 
+let isParsing = false
 let app = express();
 app.use(express.query());
 
@@ -25,8 +26,9 @@ app.use('/wechat', wechat(wechatConfig, (req, res, next) => {
   parse(req, res, next)
 }));
 
+// https://mora-bot.herokuapp.com/wechat-test
 app.use('/wechat-test', wechat(wechatTestConfig, (req, res, next) => {
-  console.log('/wechat-test:', req.weixin);
+  console.log('/wechat-test:', req.weixin.FromUserName, isParsing);
   parse(req, res, next)
 }));
 
@@ -35,15 +37,17 @@ const port = env.PORT || 5000;
 const host = '0.0.0.0';
 app.listen(port, host, () => console.log(`Server on http://${host}:${port}`));
 
-
 function parse(req, res, next) {
+  if (isParsing) return
   let message = req.weixin;
-
+  isParsing = true
   fetch_video_from_url(message, res)
     .then(result => {
+      isParsing = false
       if (!result) res.reply('暂时无法解析您提供的内容!');
     })
     .catch(e => {
+      isParsing = false
       console.error(e)
       res.reply('系统错误：' + e.message)
     })

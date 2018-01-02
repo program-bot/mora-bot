@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = require("tslib");
 var util_1 = require("../inc/util");
 var puppeteer = require("puppeteer");
-var currentUrl = null;
 function default_1(message, res) {
     return tslib_1.__awaiter(this, void 0, void 0, function () {
         var result, url, content;
@@ -21,17 +20,9 @@ function default_1(message, res) {
                         url = message.Url;
                     }
                     if (!url) return [3, 2];
-                    if (currentUrl === url)
-                        return [2, true];
-                    else if (currentUrl) {
-                        res.reply('当前正在处理其它资源，请稍后');
-                        return [2, true];
-                    }
-                    currentUrl = url;
                     return [4, fetchVideo(url)];
                 case 1:
                     result = _a.sent();
-                    currentUrl = null;
                     _a.label = 2;
                 case 2:
                     if (!result)
@@ -59,7 +50,6 @@ function fetchVideo(url) {
                     })];
                 case 1:
                     browser = _a.sent();
-                    console.log(browser.wsEndpoint());
                     return [4, browser.newPage()];
                 case 2:
                     page = _a.sent();

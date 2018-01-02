@@ -2,7 +2,6 @@ import {Message, ITextMessage, ILinkMessage} from '../inc/interface'
 import {base64} from '../inc/util'
 import * as puppeteer from 'puppeteer'
 
-let currentUrl: string | null = null
 export default async function(message: Message, res: any): Promise<boolean> {
 
   let result: IFetchVideoFromUrlResult = null
@@ -17,17 +16,7 @@ export default async function(message: Message, res: any): Promise<boolean> {
     url = (message as ILinkMessage).Url
   }
 
-  if (url) {
-    if (currentUrl === url) return true
-    else if (currentUrl) {
-      res.reply('当前正在处理其它资源，请稍后')
-      return true
-    }
-
-    currentUrl = url
-    result = await fetchVideo(url)
-    currentUrl = null
-  }
+  if (url) result = await fetchVideo(url)
 
   if (!result) return false
   if (result.error) {
@@ -43,7 +32,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
-  console.log(browser.wsEndpoint())
+  // console.log(browser.wsEndpoint())
   const page = await browser.newPage()
   // await page.setRequestInterception(true)
 
