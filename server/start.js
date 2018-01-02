@@ -3,7 +3,7 @@ const env = process.env;
 
 const express = require('express');
 const wechat = require('wechat');
-const fetch_video_from_url = require('./mixin/fetch_video_from_url')
+const fetch_video_from_url = require('./mixin/fetch_video_from_url').default
 
 // https://mora-bot.herokuapp.com/wechat
 // test account: http://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index
