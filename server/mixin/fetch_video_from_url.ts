@@ -25,9 +25,10 @@ export default async function(message: Message, res: any): Promise<boolean> {
 export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult> {
   const browser = await puppeteer.launch({
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
-    // args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
   const page = await browser.newPage()
+  // await page.setRequestInterception(true)
 
   let video: string | undefined
   let error: string | undefined
