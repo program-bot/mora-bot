@@ -96,10 +96,7 @@ function fetchVideo(url) {
                 case 4:
                     title = _a.sent();
                     _a.label = 5;
-                case 5: return [4, browser.close()];
-                case 6:
-                    _a.sent();
-                    return [2, (video || error) ? { video: video, error: error, title: title } : null];
+                case 5: return [2, (video || error) ? { video: video, error: error, title: title } : null];
             }
         });
     });

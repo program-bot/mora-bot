@@ -62,7 +62,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
 
   await page.goto(url)
   if (video) title = await page.title()
-  await browser.close()
+  // await browser.close()
   return (video || error) ? {video, error, title} : null
 }
 

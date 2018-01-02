@@ -41,7 +41,7 @@ function parse(req, res, next) {
 
   fetch_video_from_url(message, res)
     .then(result => {
-      if (!result) res.reply('对不起，暂时无法解析您提供的内容!');
+      if (!result) res.reply('暂时无法解析您提供的内容!');
     })
     .catch(e => {
       console.error(e)
