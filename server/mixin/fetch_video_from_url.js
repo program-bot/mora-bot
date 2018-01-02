@@ -50,6 +50,7 @@ function fetchVideo(url) {
                     })];
                 case 1:
                     browser = _a.sent();
+                    console.log(browser.wsEndpoint());
                     return [4, browser.newPage()];
                 case 2:
                     page = _a.sent();

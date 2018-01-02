@@ -27,6 +27,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
+  console.log(browser.wsEndpoint())
   const page = await browser.newPage()
   // await page.setRequestInterception(true)
 
