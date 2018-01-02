@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    // "declaration": true,
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": false,
+    "importHelpers": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noImplicitThis": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noLib": false,
+    "lib": [
+      "dom",
+      "es6"
+    ]
+    // "outDir": "./",
+    // "jsx": "react"
+  },
+  "include": [
+    "server"
+  ],
+  "exclude": [
+    // "src/*/__tests__",
+    // "src/*/__mocks__",
+
+    // "src/*/*/__tests__",
+    // "src/*/*/__mocks__"
+  ]
+}
