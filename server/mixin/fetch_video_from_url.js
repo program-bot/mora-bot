@@ -45,7 +45,9 @@ function fetchVideo(url) {
         var browser, page, video, error, title;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4, puppeteer.launch()];
+                case 0: return [4, puppeteer.launch({
+                        args: ['--no-sandbox', '--disable-setuid-sandbox']
+                    })];
                 case 1:
                     browser = _a.sent();
                     return [4, browser.newPage()];
