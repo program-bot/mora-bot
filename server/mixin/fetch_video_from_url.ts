@@ -2,15 +2,31 @@ import {Message, ITextMessage, ILinkMessage} from '../inc/interface'
 import {base64} from '../inc/util'
 import * as puppeteer from 'puppeteer'
 
+let currentUrl: string | null = null
 export default async function(message: Message, res: any): Promise<boolean> {
+
   let result: IFetchVideoFromUrlResult = null
+  let url: string | undefined
+
   if (message.MsgType === 'text') {
     let content = (message as ITextMessage).Content
     if (/^https?:\/\//.test(content)) {
-      result = await fetchVideo(content)
+      url = content
     }
   } else if (message.MsgType === 'link') {
-    result = await fetchVideo((message as ILinkMessage).Url)
+    url = (message as ILinkMessage).Url
+  }
+
+  if (url) {
+    if (currentUrl === url) return true
+    else if (currentUrl) {
+      res.reply('当前正在处理其它资源，请稍后')
+      return true
+    }
+
+    currentUrl = url
+    result = await fetchVideo(url)
+    currentUrl = null
   }
 
   if (!result) return false
@@ -62,7 +78,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
 
   await page.goto(url)
   if (video) title = await page.title()
-  // await browser.close()
+  await browser.close()
   return (video || error) ? {video, error, title} : null
 }
 

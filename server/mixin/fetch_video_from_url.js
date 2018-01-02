@@ -3,28 +3,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = require("tslib");
 var util_1 = require("../inc/util");
 var puppeteer = require("puppeteer");
+var currentUrl = null;
 function default_1(message, res) {
     return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var result, content;
+        var result, url, content;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     result = null;
-                    if (!(message.MsgType === 'text')) return [3, 3];
-                    content = message.Content;
-                    if (!/^https?:\/\//.test(content)) return [3, 2];
-                    return [4, fetchVideo(content)];
+                    if (message.MsgType === 'text') {
+                        content = message.Content;
+                        if (/^https?:\/\//.test(content)) {
+                            url = content;
+                        }
+                    }
+                    else if (message.MsgType === 'link') {
+                        url = message.Url;
+                    }
+                    if (!url) return [3, 2];
+                    if (currentUrl === url)
+                        return [2, true];
+                    else if (currentUrl) {
+                        res.reply('当前正在处理其它资源，请稍后');
+                        return [2, true];
+                    }
+                    currentUrl = url;
+                    return [4, fetchVideo(url)];
                 case 1:
                     result = _a.sent();
+                    currentUrl = null;
                     _a.label = 2;
-                case 2: return [3, 5];
-                case 3:
-                    if (!(message.MsgType === 'link')) return [3, 5];
-                    return [4, fetchVideo(message.Url)];
-                case 4:
-                    result = _a.sent();
-                    _a.label = 5;
-                case 5:
+                case 2:
                     if (!result)
                         return [2, false];
                     if (result.error) {
@@ -96,7 +105,10 @@ function fetchVideo(url) {
                 case 4:
                     title = _a.sent();
                     _a.label = 5;
-                case 5: return [2, (video || error) ? { video: video, error: error, title: title } : null];
+                case 5: return [4, browser.close()];
+                case 6:
+                    _a.sent();
+                    return [2, (video || error) ? { video: video, error: error, title: title } : null];
             }
         });
     });
