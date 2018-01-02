@@ -12,6 +12,7 @@
 * http://node-modules.com/
 * https://github.com/zeke/all-the-package-names
 * https://github.com/solids/npmsearch
+* https://github.com/johnmpotter/npm-trends
 * https://github.com/anvaka/npmrank
 * https://github.com/corruptmem/nodejsmodules
 * https://github.com/anvaka/pm
