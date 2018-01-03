@@ -44,7 +44,11 @@ heroku logs --tail
 
 
 
-## buildpacks
+## 资源
+
+* 微信测试接口 https://mora-bot.herokuapp.com/wechat-test
+
+* buildpacks
 
 ```json
 [

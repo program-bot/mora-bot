@@ -14,8 +14,8 @@ function default_1(message, res) {
         return tslib_1.__generator(this, function (_a) {
             if (message.MsgType === 'text') {
                 content = message.Content;
-                if (/^https?:\/\//.test(content))
-                    url = content;
+                if (/(https?:\/\/[^\s]+)/.test(content))
+                    url = RegExp.$1;
             }
             else if (message.MsgType === 'link') {
                 url = message.Url;

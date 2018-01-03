@@ -18,7 +18,7 @@ export default async function(message: Message, res: any): Promise<boolean> {
   let url: string | undefined
   if (message.MsgType === 'text') {
     let content = (message as ITextMessage).Content
-    if (/^https?:\/\//.test(content)) url = content
+    if (/(https?:\/\/[^\s]+)/.test(content)) url = RegExp.$1
   } else if (message.MsgType === 'link') {
     url = (message as ILinkMessage).Url
   }
