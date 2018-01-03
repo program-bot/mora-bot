@@ -42,3 +42,20 @@ heroku logs --tail
 * res:      其它资源
 * scripts:  对应 npm 的 package.json 文件中的 scripts
 
+
+
+## full app.json
+
+```json
+{
+  "name": "mora-bot",
+  "buildpacks": [
+    {"url": "https://github.com/program-bot/puppeteer-heroku-buildpack"},
+    {"url": "https://github.com/heroku/heroku-buildpack-google-chrome"},
+    {"url": "https://github.com/program-bot/npm-buildpack"},
+    {"url": "https://github.com/program-bot/github-buildpack"},
+    {"url": "https://github.com/heroku/heroku-buildpack-nodejs"}
+  ]
+}
+```
+

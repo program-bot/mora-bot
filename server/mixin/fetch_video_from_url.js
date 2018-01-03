@@ -77,6 +77,7 @@ function fetchVideo(url) {
                     log('打开浏览器...');
                     return [4, puppeteer.launch({
                             executablePath: process.env.GOOGLE_CHROME_BIN,
+                            args: ['--no-sandbox', '--disable-setuid-sandbox']
                         })];
                 case 1:
                     browser = _a.sent();

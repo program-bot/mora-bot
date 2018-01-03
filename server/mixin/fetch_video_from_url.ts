@@ -72,7 +72,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
     // headless: false,
     // devtools: true,
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
-    // args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
 
   log('新建页面...')
