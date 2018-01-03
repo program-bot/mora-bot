@@ -25,6 +25,10 @@ export default async function(message: Message, res: any): Promise<boolean> {
     fetchVideoTo(url, (text: string) => {
       log(`===> 返回结果: ${text}`)
       bot.promisify('sendText')(message.FromUserName, text)
+        .catch(e => {
+          log('微信接口 sendText 发送消息失败')
+          log(e)
+        })
     })
     return true
   }

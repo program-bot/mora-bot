@@ -22,7 +22,11 @@ function default_1(message, res) {
                 res.reply("\u6B63\u5728\u89E3\u6790 " + url + " \u4E2D\u7684\u89C6\u9891\uFF0C\u8BF7\u7A0D\u5019...");
                 fetchVideoTo(url, function (text) {
                     log("===> \u8FD4\u56DE\u7ED3\u679C: " + text);
-                    bot.promisify('sendText')(message.FromUserName, text);
+                    bot.promisify('sendText')(message.FromUserName, text)
+                        .catch(function (e) {
+                        log('微信接口 sendText 发送消息失败');
+                        log(e);
+                    });
                 });
                 return [2, true];
             }
