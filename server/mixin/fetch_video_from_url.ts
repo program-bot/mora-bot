@@ -3,7 +3,6 @@ import {base64} from '../inc/util'
 import * as puppeteer from 'puppeteer'
 
 export default async function(message: Message, res: any): Promise<boolean> {
-
   let result: IFetchVideoFromUrlResult = null
   let url: string | undefined
 
@@ -16,7 +15,9 @@ export default async function(message: Message, res: any): Promise<boolean> {
     url = (message as ILinkMessage).Url
   }
 
-  if (url) result = await fetchVideo(url)
+  if (url) {
+    result = await fetchVideo(url)
+  }
 
   if (!result) return false
   if (result.error) {

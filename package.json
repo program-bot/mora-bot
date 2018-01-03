@@ -37,6 +37,7 @@
   "homepage": "https://github.com/program-bot/mora-bot#readme",
   "devDependencies": {
     "@types/base-64": "0.1.2",
+    "@types/express": "4.11.0",
     "@types/node": "6.0.95",
     "@types/puppeteer": "0.13.9",
     "dotenv": "2.0.0",
