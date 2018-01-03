@@ -33,10 +33,12 @@ function default_1(message, res) {
 exports.default = default_1;
 function fetchVideoTo(url, send) {
     return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var result;
+        var result, e_1;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4, fetchVideo(url)];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, fetchVideo(url)];
                 case 1:
                     result = _a.sent();
                     if (!result) {
@@ -48,7 +50,13 @@ function fetchVideoTo(url, send) {
                     else if (result.video) {
                         send(result.title + " " + result.video);
                     }
-                    return [2];
+                    return [3, 3];
+                case 2:
+                    e_1 = _a.sent();
+                    send('系统错误 ' + e_1.message);
+                    log(e_1);
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

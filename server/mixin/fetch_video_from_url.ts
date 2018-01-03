@@ -33,14 +33,19 @@ export default async function(message: Message, res: any): Promise<boolean> {
 }
 
 async function fetchVideoTo(url: string, send: (text: string) => void) {
-  let result: IFetchVideoFromUrlResult = await fetchVideo(url)
+  try {
+    let result: IFetchVideoFromUrlResult = await fetchVideo(url)
 
-  if (!result) {
-    send('无法获取任何视频地址')
-  } else if (result.error) {
-    send(result.error)
-  } else if (result.video) {
-    send(`${result.title} ${result.video}`)
+    if (!result) {
+      send('无法获取任何视频地址')
+    } else if (result.error) {
+      send(result.error)
+    } else if (result.video) {
+      send(`${result.title} ${result.video}`)
+    }
+  } catch (e) {
+    send('系统错误 ' + e.message)
+    log(e)
   }
 }
 
