@@ -11,3 +11,7 @@ function error(msg) {
     console.error('\x1b[31m' + util.format.apply(util, [msg].concat(args)) + '\x1b[0m');
 }
 exports.error = error;
+function sleep(ms) {
+    return new Promise(function (resolve) { return setTimeout(resolve, ms); });
+}
+exports.sleep = sleep;

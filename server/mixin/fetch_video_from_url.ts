@@ -1,10 +1,13 @@
 import {Message, ITextMessage, ILinkMessage} from '../inc/interface'
-import {base64} from '../inc/util'
+import {base64, sleep} from '../inc/util'
 import * as puppeteer from 'puppeteer'
 import * as debug from 'debug'
 
+const devices = require('puppeteer/DeviceDescriptors')
 const bot = require('../../libs/wechat-bot')
 const log = debug('fetch:video')
+
+const iPhone6S = devices['iPhone 6 Plus']
 
 /**
  * 服务器长时间没返回信息时，微信会连续推三条一样的信息给服务器，
@@ -21,11 +24,11 @@ export default async function(message: Message, res: any): Promise<boolean> {
   }
 
   if (url) {
-    res.reply(`正在解析 ${url} 中的视频，请稍候...`)
+    res.reply(`正在解析链接中的视频，请稍候...`)
     fetchVideoTo(url, (text: string) => {
       log(`===> 返回结果: ${text}`)
       bot.promisify('sendText')(message.FromUserName, text)
-        .catch(e => {
+        .catch((e: any) => {
           log('微信接口 sendText 发送消息失败')
           log(e)
         })
@@ -45,7 +48,7 @@ async function fetchVideoTo(url: string, send: (text: string) => void) {
     } else if (result.error) {
       send(result.error)
     } else if (result.video) {
-      send(`${result.title} ${result.video}`)
+      send(`${result.title}\n${result.video}`)
     }
   } catch (e) {
     send('系统错误 ' + e.message)
@@ -53,15 +56,28 @@ async function fetchVideoTo(url: string, send: (text: string) => void) {
   }
 }
 
+
+/**
+ * 今日头条（西瓜视频）：  https://www.ixigua.com/i6502213040778248717
+ * 火山小视频：          https://reflow.huoshan.com/share/item/6498845794311867662/
+ * 抖音：               https://www.douyin.com/share/video/6433255077565172994/
+ * 快手：               https://m.kuaishou.com/photo/257290945/4463112708
+ */
 export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult> {
   log('打开浏览器...')
   const browser = await puppeteer.launch({
+    // executablePath: '/Applications/Chrome.app/Contents/MacOS/Google Chrome',
+    // executablePath: '/Applications/Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+    executablePath: process.env.GOOGLE_CHROME_BIN,
+    // headless: false,
+    // devtools: true,
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    // args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
 
   log('新建页面...')
   const page = await browser.newPage()
+  await page.emulate(iPhone6S)
   // await page.setRequestInterception(true)
 
   let video: string | undefined
@@ -69,8 +85,14 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
   let title: string | undefined
 
   page.on('response', async (response) => {
-    if (response.status !== 200) return
     let {url} = response
+    // console.log(response.headers['content-type'])
+
+    // 注意：chromium 不支持 mp4 格式
+    // video 在预加载的时候状态码是 206
+    // https://github.com/GoogleChrome/puppeteer/issues/291
+    if (response.headers['content-type'].startsWith('video/') && !video) video = url
+    if (response.status !== 200) return
 
     /* 获取头条视频 mp4 的 url 地址 */
     if (url.startsWith('https://ib.365yg.com/video/urls/v/1/toutiao/mp4/')) {
@@ -96,12 +118,25 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
   })
 
   log(`跳转到地址 ${url} ...`)
-  await page.goto(url)
-  if (video) {
+  await page.goto(url, {waitUntil: 'networkidle2'})
+  if (!video) {
+    log(`等待 2s...`)
+    await sleep(2000) // 等待页面自动去加载视频
+  }
+
+  if (video && !title) {
     log(`获取页面标题...`)
     title = await page.title()
     log(`===> 页面标题为 ${title}`)
   }
+
+  // if (!video) {
+  //   log(`screenshot ...`)
+  //   await page.screenshot({
+  //     fullPage: true,
+  //     path: '/Users/Mora/Workspace/node/program-bot/mora-bot/screen.png'
+  //   })
+  // }
 
   log(`关闭浏览器...`)
   await browser.close()
