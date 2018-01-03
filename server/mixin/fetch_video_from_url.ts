@@ -69,7 +69,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
     // executablePath: '/Applications/Chrome.app/Contents/MacOS/Google Chrome',
     // executablePath: '/Applications/Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     executablePath: process.env.GOOGLE_CHROME_BIN,
-    // headless: false,
+    headless: true,
     // devtools: true,
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
     args: ['--no-sandbox', '--disable-setuid-sandbox']

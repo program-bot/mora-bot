@@ -44,18 +44,15 @@ heroku logs --tail
 
 
 
-## full app.json
+## buildpacks
 
 ```json
-{
-  "name": "mora-bot",
-  "buildpacks": [
-    {"url": "https://github.com/program-bot/puppeteer-heroku-buildpack"},
-    {"url": "https://github.com/heroku/heroku-buildpack-google-chrome"},
-    {"url": "https://github.com/program-bot/npm-buildpack"},
-    {"url": "https://github.com/program-bot/github-buildpack"},
-    {"url": "https://github.com/heroku/heroku-buildpack-nodejs"}
-  ]
-}
+[
+  {"url": "https://github.com/program-bot/puppeteer-heroku-buildpack"},
+  {"url": "https://github.com/heroku/heroku-buildpack-google-chrome"},
+  {"url": "https://github.com/program-bot/npm-buildpack"},
+  {"url": "https://github.com/program-bot/github-buildpack"},
+  {"url": "https://github.com/heroku/heroku-buildpack-nodejs"}
+]
 ```
 
