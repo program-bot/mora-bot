@@ -1,39 +1,57 @@
 import {Message, ITextMessage, ILinkMessage} from '../inc/interface'
 import {base64} from '../inc/util'
 import * as puppeteer from 'puppeteer'
+import * as debug from 'debug'
 
+const bot = require('../../libs/wechat-bot')
+const log = debug('fetch:video')
+
+/**
+ * 服务器长时间没返回信息时，微信会连续推三条一样的信息给服务器，
+ * 三条后还是没返回，微信会关闭 socket，也就会导致服务器无法返回信息，
+ * 但可以使用消息推送，而不是 response
+ */
 export default async function(message: Message, res: any): Promise<boolean> {
-  let result: IFetchVideoFromUrlResult = null
   let url: string | undefined
-
   if (message.MsgType === 'text') {
     let content = (message as ITextMessage).Content
-    if (/^https?:\/\//.test(content)) {
-      url = content
-    }
+    if (/^https?:\/\//.test(content)) url = content
   } else if (message.MsgType === 'link') {
     url = (message as ILinkMessage).Url
   }
 
   if (url) {
-    result = await fetchVideo(url)
+    res.reply(`正在解析 ${url} 中的视频，请稍候...`)
+    fetchVideoTo(url, (text: string) => {
+      log(`===> 返回结果: ${text}`)
+      bot.promisify('sendText')(message.FromUserName, text)
+    })
+    return true
   }
 
-  if (!result) return false
-  if (result.error) {
-    res.reply(result.error)
+  return false
+}
+
+async function fetchVideoTo(url: string, send: (text: string) => void) {
+  let result: IFetchVideoFromUrlResult = await fetchVideo(url)
+
+  if (!result) {
+    send('无法获取任何视频地址')
+  } else if (result.error) {
+    send(result.error)
   } else if (result.video) {
-    res.reply(`${result.title} ${result.video}`)
+    send(`${result.title} ${result.video}`)
   }
-  return true
 }
 
 export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult> {
+  log('打开浏览器...')
   const browser = await puppeteer.launch({
     // https://github.com/program-bot/puppeteer-heroku-buildpack#puppeteer-heroku-buildpack
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
-  // console.log(browser.wsEndpoint())
+
+  log('新建页面...')
   const page = await browser.newPage()
   // await page.setRequestInterception(true)
 
@@ -48,6 +66,7 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
     /* 获取头条视频 mp4 的 url 地址 */
     if (url.startsWith('https://ib.365yg.com/video/urls/v/1/toutiao/mp4/')) {
       // text 是个 jsonp
+      log(`解析到头条的视频信息地址 ${url}，开始获取其内容...`)
       let text = await response.text()
       if (/^\w+\((.*)\)$/.test(text)) {
         let res: ITaotiaoVideoInfoData = JSON.parse(RegExp.$1)
@@ -61,14 +80,23 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
             else if (parseInt(max.definition, 10) < parseInt(all[key].definition, 10)) max = all[key]
           })
           video = base64.decode(max.main_url)
+          log(`===> 视频地址为 ${video}`)
         }
       }
     }
   })
 
+  log(`跳转到地址 ${url} ...`)
   await page.goto(url)
-  if (video) title = await page.title()
+  if (video) {
+    log(`获取页面标题...`)
+    title = await page.title()
+    log(`===> 页面标题为 ${title}`)
+  }
+
+  log(`关闭浏览器...`)
   await browser.close()
+  log(`===> 浏览器关闭成功！`)
   return (video || error) ? {video, error, title} : null
 }
 

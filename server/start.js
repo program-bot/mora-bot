@@ -16,11 +16,11 @@ var wechatTestConfig = Object.assign({}, wechatConfig, {
 });
 var app = express();
 app.use('/wechat', wechat(wechatConfig, function (req, res, next) {
-    console.log('/wechat:', req.weixin.FromUserName);
+    console.log('/wechat:', req.weixin);
     parse(req, res, next);
 }));
 app.use('/wechat-test', wechat(wechatTestConfig, function (req, res, next) {
-    console.log('/wechat-test:', req.weixin.FromUserName);
+    console.log('/wechat-test:', req.weixin);
     parse(req, res, next);
 }));
 var port = env.PORT || 5000;

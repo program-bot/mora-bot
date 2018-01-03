@@ -18,14 +18,14 @@ const wechatTestConfig = Object.assign({}, wechatConfig, {
 
 let app = express();
 
-app.use('/wechat', wechat(wechatConfig, (req, res, next) => {
-  console.log('/wechat:', req.weixin.FromUserName);
+app.use('/wechat', wechat(wechatConfig, (req: any, res: any, next: any) => {
+  console.log('/wechat:', req.weixin);
   parse(req, res, next)
 }));
 
 // https://mora-bot.herokuapp.com/wechat-test
-app.use('/wechat-test', wechat(wechatTestConfig, (req, res, next) => {
-  console.log('/wechat-test:', req.weixin.FromUserName);
+app.use('/wechat-test', wechat(wechatTestConfig, (req: any, res: any, next: any) => {
+  console.log('/wechat-test:', req.weixin);
   parse(req, res, next)
 }));
 
