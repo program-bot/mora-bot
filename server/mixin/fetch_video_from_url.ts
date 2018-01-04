@@ -85,12 +85,13 @@ export async function fetchVideo(url: string, title?: string): Promise<IFetchVid
 
   page.on('response', async (response) => {
     let {url} = response
-    // console.log(response.headers['content-type'])
+    let contentType = response.headers['content-type']
+    if (!url || !contentType) return
 
     // 注意：chromium 不支持 mp4 格式
     // video 在预加载的时候状态码是 206
     // https://github.com/GoogleChrome/puppeteer/issues/291
-    if (response.headers['content-type'].startsWith('video/') && !video) video = url
+    if (contentType.startsWith('video/') && !video) video = url
     if (response.status !== 200) return
 
     /* 获取头条视频 mp4 的 url 地址 */

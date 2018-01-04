@@ -90,12 +90,15 @@ function fetchVideo(url, title) {
                 case 3:
                     _a.sent();
                     page.on('response', function (response) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
-                        var url, text, res, all_1, max_1;
+                        var url, contentType, text, res, all_1, max_1;
                         return tslib_1.__generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     url = response.url;
-                                    if (response.headers['content-type'].startsWith('video/') && !video)
+                                    contentType = response.headers['content-type'];
+                                    if (!url || !contentType)
+                                        return [2];
+                                    if (contentType.startsWith('video/') && !video)
                                         video = url;
                                     if (response.status !== 200)
                                         return [2];

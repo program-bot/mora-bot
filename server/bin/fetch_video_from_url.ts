@@ -31,7 +31,7 @@ cli({
   console.log(`video: ${video}`)
 
   if (res.download) {
-    let distFile = path.resolve(res.outDir || '/Users/Mora/Downloads/健身/download', title)
+    let distFile = path.resolve(res.outDir || '/Users/Mora/Downloads/Videos', title)
     if (fs.existsSync(distFile)) {
       this.error(`文件 ${distFile} 已经存在了！`)
       return

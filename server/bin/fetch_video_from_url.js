@@ -40,7 +40,7 @@ cli({
                     console.log("title: " + title);
                     console.log("video: " + video);
                     if (res.download) {
-                        distFile = path.resolve(res.outDir || '/Users/Mora/Downloads/健身/download', title);
+                        distFile = path.resolve(res.outDir || '/Users/Mora/Downloads/Videos', title);
                         if (fs.existsSync(distFile)) {
                             this.error("\u6587\u4EF6 " + distFile + " \u5DF2\u7ECF\u5B58\u5728\u4E86\uFF01");
                             return [2];

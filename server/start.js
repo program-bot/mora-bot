@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = require("tslib");
 var express = require("express");
 var fetch_video_from_url_1 = require("./mixin/fetch_video_from_url");
+var Cache_1 = require("./inc/Cache");
 require('dotenv').config({ silent: true });
 var env = process.env;
 var wechat = require('wechat');
@@ -28,26 +29,32 @@ var host = '0.0.0.0';
 app.listen(port, host, function () { return console.log("Server on http://" + host + ":" + port); });
 function parse(req, res, next) {
     return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var message, e_1;
+        var message, lastWechatMessageId, e_1;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     message = req.weixin;
-                    _a.label = 1;
+                    return [4, Cache_1.default.get('lastWechatMessageId')];
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4, fetch_video_from_url_1.default(message, res)];
+                    lastWechatMessageId = _a.sent();
+                    if (lastWechatMessageId === message.MsgType)
+                        return [2, res.reply('消息处理中...')];
+                    Cache_1.default.set('lastWechatMessageId', message.MsgId);
+                    _a.label = 2;
                 case 2:
+                    _a.trys.push([2, 4, , 5]);
+                    return [4, fetch_video_from_url_1.default(message, res)];
+                case 3:
                     if (!(_a.sent())) {
                         res.reply('暂时无法解析您提供的内容!');
                     }
-                    return [3, 4];
-                case 3:
+                    return [3, 5];
+                case 4:
                     e_1 = _a.sent();
                     console.error(e_1);
                     res.reply('系统错误：' + e_1.message);
-                    return [3, 4];
-                case 4: return [2];
+                    return [3, 5];
+                case 5: return [2];
             }
         });
     });

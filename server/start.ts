@@ -1,5 +1,7 @@
 import * as express from 'express'
 import fetch_video_from_url from './mixin/fetch_video_from_url'
+import Cache from './inc/Cache'
+import {IMessage} from './inc/interface'
 
 require('dotenv').config({silent: true})
 const env = process.env
@@ -34,7 +36,12 @@ const host = '0.0.0.0'
 app.listen(port, host, () => console.log(`Server on http://${host}:${port}`))
 
 async function parse(req: any, res: any, next: any) {
-  let message = req.weixin
+  let message: IMessage = req.weixin
+
+  let lastWechatMessageId = await Cache.get<string>('lastWechatMessageId')
+  if (lastWechatMessageId === message.MsgType) return res.reply('消息处理中...')
+  Cache.set('lastWechatMessageId', message.MsgId)
+
   try {
     if (!(await fetch_video_from_url(message, res))) {
       res.reply('暂时无法解析您提供的内容!')

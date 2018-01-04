@@ -15,3 +15,17 @@ function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
 exports.sleep = sleep;
+function promisify(func) {
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return new Promise(function (resolve, reject) {
+            func.apply(void 0, args.concat([function (err, result) {
+                    err ? reject(err) : resolve(result);
+                }]));
+        });
+    };
+}
+exports.promisify = promisify;
