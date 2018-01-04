@@ -24,7 +24,7 @@ export default async function(message: Message, res: any): Promise<boolean> {
   }
 
   if (url) {
-    res.reply(`正在解析链接中的视频，请稍候...`)
+    res.reply(`正在解析 ${url} 中的视频，请稍候...`)
     fetchVideoTo(url, (text: string) => {
       log(`===> 返回结果: ${text}`)
       bot.promisify('sendText')(message.FromUserName, text)
@@ -63,7 +63,7 @@ async function fetchVideoTo(url: string, send: (text: string) => void) {
  * 抖音：               https://www.douyin.com/share/video/6433255077565172994/
  * 快手：               https://m.kuaishou.com/photo/257290945/4463112708
  */
-export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult> {
+export async function fetchVideo(url: string, title?: string): Promise<IFetchVideoFromUrlResult> {
   log('打开浏览器...')
   const browser = await puppeteer.launch({
     // executablePath: '/Applications/Chrome.app/Contents/MacOS/Google Chrome',
@@ -82,7 +82,6 @@ export async function fetchVideo(url: string): Promise<IFetchVideoFromUrlResult>
 
   let video: string | undefined
   let error: string | undefined
-  let title: string | undefined
 
   page.on('response', async (response) => {
     let {url} = response

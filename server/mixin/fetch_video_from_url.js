@@ -21,7 +21,7 @@ function default_1(message, res) {
                 url = message.Url;
             }
             if (url) {
-                res.reply("\u6B63\u5728\u89E3\u6790\u94FE\u63A5\u4E2D\u7684\u89C6\u9891\uFF0C\u8BF7\u7A0D\u5019...");
+                res.reply("\u6B63\u5728\u89E3\u6790 " + url + " \u4E2D\u7684\u89C6\u9891\uFF0C\u8BF7\u7A0D\u5019...");
                 fetchVideoTo(url, function (text) {
                     log("===> \u8FD4\u56DE\u7ED3\u679C: " + text);
                     bot.promisify('sendText')(message.FromUserName, text)
@@ -67,10 +67,10 @@ function fetchVideoTo(url, send) {
         });
     });
 }
-function fetchVideo(url) {
+function fetchVideo(url, title) {
     return tslib_1.__awaiter(this, void 0, void 0, function () {
         var _this = this;
-        var browser, page, video, error, title;
+        var browser, page, video, error;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
